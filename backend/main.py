@@ -19,7 +19,7 @@ app = FastAPI(title="TGA Explorer API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["http://localhost:5173", "https://dashboard-tga-hailton.netlify.app"],
     allow_methods=["GET"],
     allow_headers=["*"],
 )
