@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+
+# Node
+node_modules/
+dist/
+.vite/
+
+# Playwright
+screenshots/
+verify.mjs
+package.json
+package-lock.json
+
+# Misc
+.DS_Store
+*.local
