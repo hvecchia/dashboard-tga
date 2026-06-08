@@ -10,8 +10,7 @@ export function Compare() {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [selected, setSelected] = useState<EntityHistory[]>([]);
-  const [showSug, setShowSug] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (query.length < 2) { setSuggestions([]); return; }
@@ -19,13 +18,24 @@ export function Compare() {
     fn(query).then(setSuggestions).catch(() => setSuggestions([]));
   }, [query, mode]);
 
+  // Fecha o dropdown ao clicar fora do wrapper
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setSuggestions([]);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   async function addEntity(name: string) {
     if (selected.length >= 3 || selected.some(e => e.name === name)) return;
+    setSuggestions([]);
+    setQuery("");
     const fn = mode === "games" ? api.game : api.company;
     const data = await fn(name);
     setSelected(prev => [...prev, data]);
-    setQuery("");
-    setSuggestions([]);
   }
 
   function removeEntity(name: string) {
@@ -34,7 +44,7 @@ export function Compare() {
 
   const modeBtn = (m: Mode, label: string) => (
     <button
-      onClick={() => { setMode(m); setSelected([]); setQuery(""); }}
+      onClick={() => { setMode(m); setSelected([]); setQuery(""); setSuggestions([]); }}
       style={{
         background: mode === m ? "#c9a84c" : "#13131a",
         color: mode === m ? "#0a0a0f" : "#f0f0f0",
@@ -54,13 +64,10 @@ export function Compare() {
       </div>
 
       {selected.length < 3 && (
-        <div style={{ position: "relative", marginBottom: 32, maxWidth: 400 }}>
+        <div ref={wrapperRef} style={{ position: "relative", marginBottom: 32, maxWidth: 400 }}>
           <input
-            ref={inputRef}
             value={query}
             onChange={e => setQuery(e.target.value)}
-            onFocus={() => setShowSug(true)}
-            onBlur={() => setTimeout(() => setShowSug(false), 150)}
             placeholder={`Buscar ${mode === "games" ? "jogo" : "empresa"}...`}
             style={{
               width: "100%", background: "#13131a", color: "#f0f0f0",
@@ -68,7 +75,7 @@ export function Compare() {
               padding: "10px 14px", fontSize: 14, boxSizing: "border-box",
             }}
           />
-          {showSug && suggestions.length > 0 && (
+          {suggestions.length > 0 && (
             <div style={{
               position: "absolute", top: "100%", left: 0, right: 0,
               background: "#13131a", border: "1px solid #1e1e2e",
@@ -78,9 +85,7 @@ export function Compare() {
                 <div
                   key={s}
                   onMouseDown={() => addEntity(s)}
-                  style={{
-                    padding: "10px 14px", cursor: "pointer", color: "#f0f0f0", fontSize: 14,
-                  }}
+                  style={{ padding: "10px 14px", cursor: "pointer", color: "#f0f0f0", fontSize: 14 }}
                   onMouseEnter={e => (e.currentTarget.style.background = "#1e1e2e")}
                   onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
                 >{s}</div>
