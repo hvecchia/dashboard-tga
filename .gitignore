@@ -14,8 +14,8 @@ dist/
 # Playwright
 screenshots/
 verify.mjs
-package.json
-package-lock.json
+/package.json
+/package-lock.json
 
 # Misc
 .DS_Store
