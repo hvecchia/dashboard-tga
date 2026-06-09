@@ -95,6 +95,7 @@ def get_winners(
 def get_nominees(
     year: int | None = Query(None),
     category: str | None = Query(None),
+    voted: str | None = Query(None),
     search: str | None = Query(None),
     page: int = Query(1, ge=1),
     page_size: int = Query(25, ge=1, le=100),
@@ -107,6 +108,9 @@ def get_nominees(
     if category:
         conditions.append("category = ?")
         params.append(category)
+    if voted:
+        conditions.append("voted = ?")
+        params.append(voted)
     if search:
         conditions.append("(nominee LIKE ? OR company LIKE ?)")
         params.extend([f"%{search}%", f"%{search}%"])
@@ -122,6 +126,7 @@ def get_nominees(
 def get_nominees_count(
     year: int | None = Query(None),
     category: str | None = Query(None),
+    voted: str | None = Query(None),
     search: str | None = Query(None),
 ):
     conditions = []
@@ -132,6 +137,9 @@ def get_nominees_count(
     if category:
         conditions.append("category = ?")
         params.append(category)
+    if voted:
+        conditions.append("voted = ?")
+        params.append(voted)
     if search:
         conditions.append("(nominee LIKE ? OR company LIKE ?)")
         params.extend([f"%{search}%", f"%{search}%"])
@@ -139,6 +147,18 @@ def get_nominees_count(
     where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
     rows = query(f"SELECT COUNT(*) AS total FROM awards {where}", tuple(params))
     return {"total": rows[0]["total"]}
+
+
+@app.get("/api/games")
+def list_games():
+    rows = query("SELECT DISTINCT nominee FROM awards ORDER BY nominee")
+    return [r["nominee"] for r in rows]
+
+
+@app.get("/api/companies")
+def list_companies():
+    rows = query("SELECT DISTINCT company FROM awards WHERE company != '' ORDER BY company")
+    return [r["company"] for r in rows]
 
 
 @app.get("/api/companies/search")

@@ -48,12 +48,14 @@ export const api = {
   winners: (params?: { year?: number; category?: string; voted?: string }) =>
     get<Nominee[]>("/winners", params),
 
-  nominees: (params?: { year?: number; category?: string; search?: string; page?: number; page_size?: number }) =>
+  nominees: (params?: { year?: number; category?: string; voted?: string; search?: string; page?: number; page_size?: number }) =>
     get<Nominee[]>("/nominees", params),
 
-  nomineesCount: (params?: { year?: number; category?: string; search?: string }) =>
+  nomineesCount: (params?: { year?: number; category?: string; voted?: string; search?: string }) =>
     get<{ total: number }>("/nominees/count", params),
 
+  listGames: () => get<string[]>("/games"),
+  listCompanies: () => get<string[]>("/companies"),
   searchCompanies: (q: string) => get<string[]>("/companies/search", { q }),
   searchGames: (q: string) => get<string[]>("/games/search", { q }),
 
